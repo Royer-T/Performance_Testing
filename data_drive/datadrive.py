@@ -12,7 +12,7 @@ class DataDrive:
         :parameter: path to .csv file
         :return: A list of URL data, with each element representing a row from
         the CSV file.
-        :rtype: list
+        :rtype: list (nested list)
         """
         url_list = []
 
