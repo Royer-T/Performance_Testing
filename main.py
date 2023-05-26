@@ -2,6 +2,7 @@ import os
 
 #  import packages (modules/classes)
 import data_drive
+import metrics
 import websites
 
 #  constants
@@ -29,7 +30,12 @@ for url_list in evaluate_url:
             print(f'I am bad URL: {url}')
         else:
             # 4. let's get some metrics
+            web_metrics = metrics.web_metrics.WebMetrics(url)
+
+            # 4.1 TTFB (time to first byte)
             print(f'I am good URL: {url}')
+            ttfb = web_metrics.calculate_ttfb()
+            print(ttfb)
 
 
 
