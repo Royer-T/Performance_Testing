@@ -11,7 +11,7 @@ class WebMetrics:
         Calculates Time To First Byte (TTFB) by making an HTTP request to
         the specified URL.
 
-        :parameter: URL where the TTFB is to be calculated
+        :parameter: URL where the TTFB is to be calculated (str)
         :return: A JSON string containing the following metrics:
         - 'dns_lookup': Time taken in ms to perform the DNS lookup.
         - 'connect_time': Time taken in ms to establish the connection.
