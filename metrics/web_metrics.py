@@ -1,5 +1,8 @@
+import constants
 import json
 import pycurl
+import time
+from selenium_navigation.webdriver import ChromeDriver
 
 
 class WebMetrics:
@@ -13,10 +16,13 @@ class WebMetrics:
 
         :parameter: URL where the TTFB is to be calculated (str)
         :return: A JSON string containing the following metrics:
-        - 'dns_lookup': Time taken in ms to perform the DNS lookup.
-        - 'connect_time': Time taken in ms to establish the connection.
-        - 'start_transfer_time': Time taken in ms to receive the first byte
-        - 'total_time': Total time in ms taken for the entire HTTP request.
+        - 'dns_lookup': Time taken in milliseconds to perform the DNS lookup.
+        - 'connect_time': Time taken in milliseconds to establish the
+        connection.
+        - 'start_transfer_time': Time taken in milliseconds to receive the first
+        byte.
+        - 'total_time': Total time in milliseconds taken for the entire HTTP
+        request.
         :rtype: str (a JSON string)
         """
         # create and instance of 'Curl' from the 'pycurl' module
@@ -60,3 +66,39 @@ class WebMetrics:
                                    'total_time': ms_total_time})
 
         return curl_metrics
+
+    def calculate_page_load_time(self):
+        """
+        Calculates the page load time for a given URL using Chrome WebDriver.
+
+        :return: The page load time in milliseconds
+        :rtype: int
+        :raise: WebDriverException: If an error occurs while starting the
+        Chrome browser or navigating to the URL.
+        """
+        # need an instance of Chrome (chromedriver)
+        # create an object of the class, invokes a parameterized constructor
+        driver_instance = ChromeDriver(constants.CHROMEDRIVER)
+
+        #  start the browser/webdriver
+        driver = driver_instance.start_chrome()
+
+        # navigate to the URL being evaluated
+        driver.get(self.url)
+
+        # wait for the page to load
+        while driver.execute_script('return document.readyState') != 'complete':
+            time.sleep(0.1)
+
+        # Get the page load time
+        navigation_start = driver.execute_script('return window.performance.'
+                                                 'timing.navigationStart')
+        load_event_end = driver.execute_script('return window.performance.'
+                                               'timing.loadEventEnd')
+        page_load_time = load_event_end - navigation_start
+
+        # quit the browser
+        driver.quit()
+
+        # Return the page load time
+        return page_load_time

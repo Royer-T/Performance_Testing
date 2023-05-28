@@ -1,5 +1,3 @@
-import os
-
 #  import packages (modules/classes)
 import data_drive
 import metrics
@@ -34,12 +32,10 @@ for url_list in evaluate_url:
             ttfb = web_metrics.calculate_ttfb()
             print(ttfb)
 
+            # 4.2 calculate page load time
+            page_load_time = web_metrics.calculate_page_load_time()
+            print(f"Page load time for {url}: {page_load_time} milliseconds")
 
-
-
-
-
-
-
+            print('we are here')
 
 print('we are here')
