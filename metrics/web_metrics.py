@@ -2,6 +2,7 @@ import constants
 import json
 import pycurl
 import time
+from io import BytesIO
 from selenium_navigation.webdriver import ChromeDriver
 
 
@@ -30,6 +31,14 @@ class WebMetrics:
 
         # specifies the URL to connect to when making an HTTP request
         curl.setopt(pycurl.URL, self.url)
+
+        # Create a buffer to store the response
+        # - this is used to prevent unneeded console writes to help with
+        # potential debugging
+        buffer = BytesIO()
+
+        # Set the buffer as the write function for curl.perform()
+        curl.setopt(curl.WRITEFUNCTION, buffer.write)
 
         #  automatically follow HTTP redirects until it reaches the final
         #  destination URL
