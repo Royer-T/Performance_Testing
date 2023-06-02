@@ -85,12 +85,9 @@ class WebMetrics:
         :raise: WebDriverException: If an error occurs while starting the
         Chrome browser or navigating to the URL.
         """
-        # need an instance of Chrome (chromedriver)
-        # create an object of the class, invokes a parameterized constructor
-        driver_instance = ChromeDriver(constants.CHROMEDRIVER)
-
         #  start the browser/webdriver
-        driver = driver_instance.start_chrome()
+        driver = ChromeDriver.start_chrome(constants.CHROME_EXE,
+                                           constants.CHROMEDRIVER)
 
         # navigate to the URL being evaluated
         driver.get(self.url)
