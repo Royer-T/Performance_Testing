@@ -1,11 +1,21 @@
+from datetime import datetime
+
 #  import packages (modules/classes)
 import data_drive
 import metrics
 import selenium_navigation
+import storage
 import websites
 
 #  constants
 import constants
+
+# connect to the DB
+# create an object of the class, invokes a parameterized constructor
+data_storage = storage.sqlite.SQLiteDatabase(constants.DATABASE)
+
+# connect from the database
+data_storage.connect()
 
 # 1. create a list of URLs to be evaluated
 # create an object of the class, invokes a parameterized constructor
@@ -48,4 +58,15 @@ for url_list in evaluate_url:
 
             driver.quit()
 
+            # 5. add some information to the SQLite DB
+            insert_data_query = '''INSERT INTO cps_prod (url, occurrence) VALUES (?, ?);
+            '''
+            # we need the current date/time
+            current_datetime = datetime.now()
+
+            session_info = (url, current_datetime)
+            data_storage.execute_query(insert_data_query, session_info)
+
+# Disconnect from the database
+data_storage.disconnect()
 print('we are here')
