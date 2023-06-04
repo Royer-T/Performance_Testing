@@ -1,6 +1,7 @@
 #  import packages (modules/classes)
 import data_drive
 import metrics
+import selenium_navigation
 import websites
 
 #  constants
@@ -32,10 +33,19 @@ for url_list in evaluate_url:
             ttfb = web_metrics.calculate_ttfb()
             print(ttfb)
 
-            # 4.2 calculate page load time
-            page_load_time = web_metrics.calculate_page_load_time()
-            print(f"Page load time for {url}: {page_load_time} milliseconds")
+            # use Selenium and a Chromedriver instance to gather more metrics
+            navigate = selenium_navigation.webdriver.ChromeDriver()
+            driver = navigate.start_chrome(constants.CHROME_EXE, constants.CHROMEDRIVER)
 
-            print('we are here')
+            # 4.2 calculate page render time
+            ttfp = web_metrics.calculate_ttfp(driver)
+            print(f"Page TTFP time for {url}: {ttfp} milliseconds")
+
+            # 4.3 calculate page load time
+            page_load_time = web_metrics.calculate_page_load(driver)
+            print(f"Page load time for {url}: {page_load_time} milliseconds")
+            print()
+
+            driver.quit()
 
 print('we are here')

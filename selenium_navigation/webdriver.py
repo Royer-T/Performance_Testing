@@ -23,6 +23,8 @@ class ChromeDriver:
         options.add_argument('--start-maximized')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-popup-blocking')
+        options.add_argument("--disable-cache")
+        options.add_argument("--disk-cache-size=0")
         options.binary_location = chrome_path
 
         service = Service(ChromeDriverManager().install())
