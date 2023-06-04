@@ -10,12 +10,6 @@ import websites
 #  constants
 import constants
 
-# connect to the DB
-# create an object of the class, invokes a parameterized constructor
-data_storage = storage.sqlite.SQLiteDatabase(constants.DATABASE)
-
-# connect from the database
-data_storage.connect()
 
 # 1. create a list of URLs to be evaluated
 # create an object of the class, invokes a parameterized constructor
@@ -59,14 +53,17 @@ for url_list in evaluate_url:
             driver.quit()
 
             # 5. add some information to the SQLite DB
-            insert_data_query = '''INSERT INTO cps_prod (url, occurrence) VALUES (?, ?);
-            '''
-            # we need the current date/time
-            current_datetime = datetime.now()
+            # create an object of the class, invokes a parameterized constructor
+            data_storage = storage.sqlite.SQLiteDatabase(constants.DATABASE)
 
-            session_info = (url, current_datetime)
-            data_storage.execute_query(insert_data_query, session_info)
+            with data_storage as db:
+                insert_data_query = '''INSERT INTO cps_prod (url, occurrence) VALUES (?, ?);
+                '''
 
-# Disconnect from the database
-data_storage.disconnect()
+                # we need the current date/time
+                current_datetime = datetime.now()
+                session_info = (url, current_datetime)
+
+                data_storage.execute_query(insert_data_query, session_info)
+
 print('we are here')

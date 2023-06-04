@@ -24,6 +24,27 @@ class SQLiteDatabase:
         self.connection = None
         self.cursor = None
 
+    def __enter__(self):
+        """
+        Context manager entry point.
+
+        Returns:
+            SQLiteDatabase: The SQLiteDatabase instance.
+        """
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Context manager exit point.
+
+        Args:
+            exc_type: The exception type, if any.
+            exc_val: The exception value, if any.
+            exc_tb: The traceback, if any.
+        """
+        self.disconnect()
+
     def connect(self):
         """
         Establishes a connection to the SQLite database.
@@ -86,3 +107,5 @@ class SQLiteDatabase:
         except sqlite3.Error as e:
             print(f"Error fetching data: {e}")
             return []
+
+
