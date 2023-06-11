@@ -10,7 +10,6 @@ import websites
 #  constants
 import constants
 
-
 # 1. create a list of URLs to be evaluated
 # create an object of the class, invokes a parameterized constructor
 datadrive_instance = data_drive.datadrive.DataDrive(constants.CSV_DRIVER)
@@ -35,6 +34,12 @@ for url_list in evaluate_url:
             # 4.1 TTFB (time to first byte)
             print(f'I am good URL: {url}')
             ttfb = web_metrics.calculate_ttfb()
+
+            # assign variables to the return values so that they can be added to the DB
+            dns_lookup = ttfb['dns_lookup']
+            connect_time = ttfb['connect_time']
+            start_transfer_time = ttfb['start_transfer_time']
+            total_time = ttfb['total_time']
             print(ttfb)
 
             # use Selenium and a Chromedriver instance to gather more metrics
@@ -57,12 +62,14 @@ for url_list in evaluate_url:
             data_storage = storage.sqlite.SQLiteDatabase(constants.DATABASE)
 
             with data_storage as db:
-                insert_data_query = '''INSERT INTO cps_prod (url, occurrence) VALUES (?, ?);
+                insert_data_query = '''INSERT INTO cps_prod (url, occurrence, 
+                dns_lookup, connect_time, start_transfer_time, total_time) VALUES (?, ?, ?, ?, ?, ?);
                 '''
 
                 # we need the current date/time
                 current_datetime = datetime.now()
-                session_info = (url, current_datetime)
+                session_info = (url, current_datetime, dns_lookup, connect_time,
+                                start_transfer_time, total_time)
 
                 data_storage.execute_query(insert_data_query, session_info)
 
