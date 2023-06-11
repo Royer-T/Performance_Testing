@@ -8,15 +8,17 @@ import storage
 import websites
 
 #  constants
-import constants
+from constants import *
 
 # 1. create a list of URLs to be evaluated
-# create an object of the class, invokes a parameterized constructor
-datadrive_instance = data_drive.datadrive.DataDrive(constants.CSV_DRIVER)
-evaluate_url = datadrive_instance.data_list_cvs()
+# Create an object of the DataDrive class
+data_drive_instance = data_drive.datadrive.DataDrive(CSV_DRIVER)
+
+# Get the list of URLs to be evaluated
+urls_to_evaluate = data_drive_instance.data_list_cvs()
 
 # 2. loop through the list of URLs
-for url_list in evaluate_url:
+for url_list in urls_to_evaluate:
     # this is a nested list, another loop is need to get the URL as a string
     for url in url_list:
         # 3. we need to know if the URL is 'up' if an evaluation can happen
@@ -44,7 +46,7 @@ for url_list in evaluate_url:
 
             # use Selenium and a Chromedriver instance to gather more metrics
             navigate = selenium_navigation.webdriver.ChromeDriver()
-            driver = navigate.start_chrome(constants.CHROME_EXE, constants.CHROMEDRIVER)
+            driver = navigate.start_chrome(CHROME_EXE, CHROMEDRIVER)
 
             # 4.2 calculate page render time
             ttfp = web_metrics.calculate_ttfp(driver)
@@ -59,7 +61,7 @@ for url_list in evaluate_url:
 
             # 5. add some information to the SQLite DB
             # create an object of the class, invokes a parameterized constructor
-            data_storage = storage.sqlite.SQLiteDatabase(constants.DATABASE)
+            data_storage = storage.sqlite.SQLiteDatabase(DATABASE)
 
             with data_storage as db:
                 insert_data_query = '''INSERT INTO cps_prod (url, occurrence, 
