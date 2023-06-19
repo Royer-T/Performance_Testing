@@ -2,6 +2,7 @@ from datetime import datetime
 
 #  import packages (modules/classes)
 from data_drive.datadrive import DataDrive
+from url_information.information import Info
 import metrics
 import selenium_navigation
 import storage
@@ -17,9 +18,23 @@ data_drive_instance = DataDrive(CSV_DRIVER)
 # Get the list of URLs to be evaluated
 urls_to_evaluate = data_drive_instance.data_list_cvs()
 
+
 # 2. loop through the list of URLs
 for nested_url_list in urls_to_evaluate:
     url, *_ = nested_url_list
+
+    # Create an object of the Info class
+    url_info = Info(url)
+    environment = url_info.environment()
+    version_string = url_info.versioning()
+
+
+
+
+
+
+
+
 
     # 3. we need to know if the URL is 'up' if an evaluation can happen
     # creating an object of the class, invokes a parameterized constructor
