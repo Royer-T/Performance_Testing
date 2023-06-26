@@ -13,15 +13,13 @@ from constants import *
 
 # 1. create a list of URLs to be evaluated
 # Create an object of the DataDrive class
-data_drive_instance = DataDrive(CSV_DRIVER)
+data_driver_csv = DataDrive(CSV_DRIVER)
 
 # Get the list of URLs to be evaluated
-urls_to_evaluate = data_drive_instance.data_list_cvs()
-
+urls_from_csv = data_driver_csv.data_drive_cvs()
 
 # 2. loop through the list of URLs
-for nested_url_list in urls_to_evaluate:
-    url, *_ = nested_url_list
+for url, strategy in urls_from_csv.items():
 
     # Create an object of the Info class
     url_info = Info(url)

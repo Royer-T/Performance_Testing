@@ -1,28 +1,28 @@
-import csv
+import pandas as pd
 
 
 class DataDrive:
-    def __init__(self, data_source):
+    def __init__(self, csv_source):
         """
-        Initialize a DataDrive object.
+        Initializes a DataDrive object.
 
-        :param data_source: Path to the CSV file.
-        :type data_source: str
+        Parameters:
+        - csv_source (str): The path or URL of the CSV file.
+
         """
-        self.data_source = data_source
+        self.csv_source = csv_source
 
-    def data_list_cvs(self):
+    def data_drive_cvs(self):
         """
-        Read data from a CSV file and return a list of URL data.
+        Reads the CSV file and returns a dictionary of URLs and their corresponding descriptions.
 
-        :return: A list of URL data, with each element representing a row from
-        the CSV file.
-        :rtype: list (nested list)
+        Returns:
+        - data_drive_dict (dict): A dictionary mapping URLs to descriptions.
+
         """
-        with open(self.data_source, 'r') as file:
-            csv_reader = csv.reader(file)
-            next(csv_reader)  # Skip the header row
+        data_driver_urls = pd.read_csv(self.csv_source)
 
-            url_list = [row for row in csv_reader]
+        data_drive_dict = {row['URL']: row['Description'] for _, row in
+                           data_driver_urls.iterrows()}
 
-        return url_list
+        return data_drive_dict
