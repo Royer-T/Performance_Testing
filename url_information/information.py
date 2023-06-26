@@ -42,7 +42,7 @@ class Info:
 
         response = requests.get(version_checker)
 
-        if response.status_code == 201:
+        if response.status_code == 200:
             version = self.extract_version(response.text)
             branch = self.extract_branch(response.text)
 
