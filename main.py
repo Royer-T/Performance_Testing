@@ -20,19 +20,21 @@ urls_from_csv = data_driver_csv.data_drive_cvs()
 
 # 2. loop through the list of URLs
 for url, strategy in urls_from_csv.items():
+    # 2.1 create an empty dictionary to store URL data
+    url_data = dict()
 
+    # 2.2 add what we initially know
+    url_data.update({'URL': url,
+                     'Description': strategy
+                     })
+
+    # 2.3 gather version information
     # Create an object of the Info class
-    url_info = Info(url)
-    environment = url_info.environment()
-    version_string = url_info.versioning()
+    url_versioning = Info(url)
 
-
-
-
-
-
-
-
+    # get the environment of the URL
+    environment = url_versioning.environment()
+    version_string = url_versioning.versioning()
 
     # 3. we need to know if the URL is 'up' if an evaluation can happen
     # creating an object of the class, invokes a parameterized constructor
