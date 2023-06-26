@@ -40,30 +40,9 @@ class Info:
         version_checker = environment_urls.get(environment_name,
                                                environment_urls['PROD'])
 
-        headers = {
-            # 'Authority': 'healthtrioconnect.com',
-            # 'Method': 'GET',
-            # 'Path': '/version.txt',
-            # 'Scheme': 'https',
-            # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            # 'Accept-Encoding': 'gzip, deflate, br',
-            # 'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-            #'Cookie': 'cf_clearance=0PhxHvjl4m73IxR8sv0XhnyqCj3vSqxBRz3kRT.BVuc-1687135342-0-160; UBSID=cb6b12c5-6d53-4d68-8741-55392054d6d7; __cf_bm=1Jie22JuGP7dvf1FIY0ccJu1T5auO.8xx0lHYXrHfoY-1687135346-0-Aa8pEPxaPYB+Kfkk3oeWLOggoMWhtx9DBjfwDuMXDeK7v+2+ixS9ho+dgDuEIxaRzVYElMY/Y4GY0jgJhqzPZKv/JXRHP+y81VH1iQS5GMk9; _cfuvid=zo6HDANep4bkTNGDJjvRFSTB2Z7q2tGiYB2rsc0nwfY-1687135346336-0-604800000',
-            'Cookie': 'cf_autotest=3d864a41462695e19d9a90a0b340ca3f6d63c014'
-            # 'Sec-Ch-Ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-            # 'Sec-Ch-Ua-Mobile': '?0',
-            # 'Sec-Ch-Ua-Platform': '"Windows"',
-            # 'Sec-Fetch-Dest': 'document',
-            # 'Sec-Fetch-Mode': 'navigate',
-            # 'Sec-Fetch-Site': 'none',
-            # 'Sec-Fetch-User': '?1',
-            # 'Upgrade-Insecure-Requests': '1',
-            ##'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-        }
+        response = requests.get(version_checker)
 
-        response = requests.get(version_checker, headers=headers)
-
-        if response.status_code == 200:
+        if response.status_code == 201:
             version = self.extract_version(response.text)
             branch = self.extract_branch(response.text)
 

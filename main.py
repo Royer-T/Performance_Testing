@@ -18,6 +18,15 @@ data_driver_csv = DataDrive(CSV_DRIVER)
 # Get the list of URLs to be evaluated
 urls_from_csv = data_driver_csv.data_drive_cvs()
 
+# 2. get environment information so that it is only ever called once
+
+
+
+
+
+
+
+
 # 2. loop through the list of URLs
 for url, strategy in urls_from_csv.items():
     # 2.1 create an empty dictionary to store URL data
@@ -35,6 +44,17 @@ for url, strategy in urls_from_csv.items():
     # get the environment of the URL
     environment = url_versioning.environment()
     version_string = url_versioning.versioning()
+    version = version_string['version']
+    branch = version_string['branch']
+
+    # update the dictionary
+    url_data.update({'Version': version,
+                     'Branch': branch})
+
+
+
+
+
 
     # 3. we need to know if the URL is 'up' if an evaluation can happen
     # creating an object of the class, invokes a parameterized constructor
