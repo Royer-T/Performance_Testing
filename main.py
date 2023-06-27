@@ -1,12 +1,12 @@
-from datetime import datetime
+import datetime
 
 #  import packages (modules/classes)
 from data_drive.datadrive import DataDrive
 from url_information.information import Info
+from websites.website import Website
 import metrics
 import selenium_navigation
 import storage
-import websites
 
 #  constants
 from constants import *
@@ -24,8 +24,14 @@ for url, strategy in urls_from_csv.items():
     url_data = dict()
 
     # 2.2 add what we initially know
+    # get the current data/time
+    now = datetime.datetime.now()
+    formatted_date = now.strftime("%Y-%m-%d %I:%M %p")
+
+    # up the dictionary
     url_data.update({'URL': url,
-                     'Description': strategy
+                     'Description': strategy,
+                     'Date': formatted_date
                      })
 
     # 2.3 gather version information
@@ -48,21 +54,28 @@ for url, strategy in urls_from_csv.items():
                      'Version': version,
                      'Branch': branch})
 
-
-
-
-
-
     # 3. we need to know if the URL is 'up' if an evaluation can happen
-    # creating an object of the class, invokes a parameterized constructor
-    url_response = websites.website.Website(url)
-    url_up = url_response.website_up()
+    # Create an object of the Website class
+    url_response = Website()
+    url_up = url_response.website_up(url)
 
     if url_up is False:
         # might want to log an error or something
         print(f'I am bad URL: {url}')
     else:
         # 4. let's get some metrics
+
+
+
+
+
+
+
+
+
+
+
+
         web_metrics = metrics.web_metrics.WebMetrics(url)
 
         # 4.1 TTFB (time to first byte)
