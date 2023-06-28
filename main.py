@@ -70,80 +70,54 @@ for url, description in urls_from_csv.items():
     url_data['start_transfer_time'] = ttfb.get('start_transfer_time')
     url_data['total_time'] = ttfb.get('total_time')
 
+    # 5. let's get some Lighthouse metrics
+    # Create an object of the Website class
+    output_directory = LIGHTHOUSE_AUDIT
+    runner = LighthouseRunner(output_directory)
+
+    # 5.1 run the Lighthouse audit
+    audit_success = runner.run_lighthouse(url, description)
+
+    if not audit_success:
+        # Log an error or handle the case where the audit was not completed
+        print(f"audit for {description} in {url_data.get('Environment')} could "
+              f"not be completed")
+        continue
+
+    # 5.2 ensure that the audit has created a .json file
+    # this is needed since it was created outside the python framework
+    audit_json_exist = runner.audit_exists(description)
+
+    if not audit_json_exist:
+        # Log an error or handle the case where the audit was not found
+        print(f'{description}.json could not be found in: {LIGHTHOUSE_AUDIT}')
+        continue
 
 
 
+    if runner.audit_exist(description):
+        print('audit is there')
+    else:
+        print('audit is not there')
+
+    print('stuff')
 
 
 
+    # 5. add some information to the SQLite DB
+    # create an object of the class, invokes a parameterized constructor
+    data_storage = storage.sqlite.SQLiteDatabase(DATABASE)
 
+    with data_storage as db:
+        insert_data_query = '''INSERT INTO cps_prod (url, occurrence, 
+        dns_lookup, connect_time, start_transfer_time, total_time) VALUES (?, ?, ?, ?, ?, ?);
+        '''
 
+        # we need the current date/time
+        current_datetime = datetime.now()
+        session_info = (url, current_datetime, dns_lookup, connect_time,
+                        start_transfer_time, total_time)
 
-
-
-
-
-
-
-
-
-        # 5. let's get some Lighthouse metrics
-        # Create an object of the Website class
-        output_directory = LIGHTHOUSE_AUDIT
-        runner = LighthouseRunner(output_directory)
-
-        # Run the Lighthouse audit
-        audit_success = runner.run_lighthouse(url, description)
-
-        # ensure that the audit has created a .json file
-        # this is needed since it was created outside the python framework
-        if runner.audit_exist(description):
-            print('audit is there')
-        else:
-            print('audit is not there')
-
-        print('stuff')
-
-        # 4.1 TTFB (time to first byte)
-        print(f'I am good URL: {url}')
-        ttfb = web_metrics.calculate_ttfb()
-
-        # assign variables to the return values so that they can be added to the DB
-        dns_lookup = ttfb['dns_lookup']
-        connect_time = ttfb['connect_time']
-        start_transfer_time = ttfb['start_transfer_time']
-        total_time = ttfb['total_time']
-        print(ttfb)
-
-        # use Selenium and a Chromedriver instance to gather more metrics
-        navigate = selenium_navigation.webdriver.ChromeDriver()
-        driver = navigate.start_chrome(CHROME_EXE, CHROMEDRIVER)
-
-        # 4.2 calculate page render time
-        ttfp = web_metrics.calculate_ttfp(driver)
-        print(f"Page TTFP time for {url}: {ttfp} milliseconds")
-
-        # 4.3 calculate page load time
-        page_load_time = web_metrics.calculate_page_load(driver)
-        print(f"Page load time for {url}: {page_load_time} milliseconds")
-        print()
-
-        driver.quit()
-
-        # 5. add some information to the SQLite DB
-        # create an object of the class, invokes a parameterized constructor
-        data_storage = storage.sqlite.SQLiteDatabase(DATABASE)
-
-        with data_storage as db:
-            insert_data_query = '''INSERT INTO cps_prod (url, occurrence, 
-            dns_lookup, connect_time, start_transfer_time, total_time) VALUES (?, ?, ?, ?, ?, ?);
-            '''
-
-            # we need the current date/time
-            current_datetime = datetime.now()
-            session_info = (url, current_datetime, dns_lookup, connect_time,
-                            start_transfer_time, total_time)
-
-            data_storage.execute_query(insert_data_query, session_info)
+        data_storage.execute_query(insert_data_query, session_info)
 
 print('we are here')
