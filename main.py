@@ -1,10 +1,11 @@
 import datetime
 
 #  import packages (modules/classes)
-from data_drive.datadrive import DataDrive
+from data_driver.data_drive import DataDrive
+from metrics.curl_metrics import CurlMetrics
 from url_information.information import Info
 from websites.website import Website
-import metrics
+
 import selenium_navigation
 import storage
 
@@ -28,7 +29,7 @@ for url, strategy in urls_from_csv.items():
     now = datetime.datetime.now()
     formatted_date = now.strftime("%Y-%m-%d %I:%M %p")
 
-    # up the dictionary
+    # update the dictionary
     url_data.update({'URL': url,
                      'Description': strategy,
                      'Date': formatted_date
@@ -63,7 +64,15 @@ for url, strategy in urls_from_csv.items():
         # might want to log an error or something
         print(f'I am bad URL: {url}')
     else:
-        # 4. let's get some metrics
+        # 4. let's get some curl metrics
+        # Create an object of the CurlMetrics class
+        curl_metrics = CurlMetrics(url)
+        ttfb = curl_metrics.calculate_ttfb()
+
+        # update the dictionary
+        url_data.update(ttfb)
+
+        # 5. let's get some Lighthouse metrics
 
 
 
@@ -76,7 +85,8 @@ for url, strategy in urls_from_csv.items():
 
 
 
-        web_metrics = metrics.web_metrics.WebMetrics(url)
+
+
 
         # 4.1 TTFB (time to first byte)
         print(f'I am good URL: {url}')
