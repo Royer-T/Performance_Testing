@@ -93,7 +93,7 @@ for url, description in urls_from_csv.items():
         print(f'{description}.json could not be found in: {LIGHTHOUSE_AUDIT}')
         continue
 
-    print('just checking')
+    print('just checking more things')
 
 
 
