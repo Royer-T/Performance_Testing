@@ -22,39 +22,40 @@ urls_from_csv = data_driver_csv.data_drive_cvs()
 
 # 2. loop through the list of URLs
 for url, description in urls_from_csv.items():
-    # 2.1 create an empty dictionary to store URL data
-    url_data = dict()
+    # 2.1 Create an empty dictionary to store URL data
+    url_data = {
+        'URL': url,
+        'Description': description,
+        'Date': datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p"),
+        'Environment': None,
+        'Version': None,
+        'Branch': None
+    }
 
-    # 2.2 add what we initially know
-    # get the current data/time
-    now = datetime.datetime.now()
-    formatted_date = now.strftime("%Y-%m-%d %I:%M %p")
-
-    # update the dictionary
-    url_data.update({'URL': url,
-                     'Description': description,
-                     'Date': formatted_date
-                     })
-
-    # 2.3 gather version information
+    # 2.2 gather version information
     # Create an object of the Info class
     url_versioning = Info(url)
 
-    # get the environment of the URL
+    # Get the environment and versioning information
     environment = url_versioning.environment()
     version_string = url_versioning.versioning()
 
     if version_string is not None:
-        branch = version_string['branch']
-        version = version_string['version']
-    else:
-        version = 'unknown'
-        branch = 'unknown'
+        url_data['Version'] = version_string.get('version', 'unknown')
+        url_data['Branch'] = version_string.get('branch', 'unknown')
 
-    # update the dictionary
-    url_data.update({'Environment': environment,
-                     'Version': version,
-                     'Branch': branch})
+    # Update the dictionary
+    url_data['Environment'] = environment
+
+
+
+
+
+
+
+
+
+
 
     # 3. we need to know if the URL is 'up' if an evaluation can happen
     # Create an object of the Website class
@@ -79,24 +80,16 @@ for url, description in urls_from_csv.items():
         runner = LighthouseRunner(output_directory)
 
         # Run the Lighthouse audit
-        runner.run_lighthouse(url, description)
+        audit_success = runner.run_lighthouse(url, description)
+
+        # ensure that the audit has created a .json file
+        # this is needed since it was created outside the python framework
+        if runner.audit_exist(description):
+            print('audit is there')
+        else:
+            print('audit is not there')
 
         print('stuff')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         # 4.1 TTFB (time to first byte)
         print(f'I am good URL: {url}')

@@ -23,9 +23,16 @@ class LighthouseRunner:
 
         Args:
             url (str): The URL to run the Lighthouse audit on.
-            filename (str): The desired name of the output file (without extension).
+            filename (str): The desired name of the output file
+            (without extension).
+
+        Returns:
+            bool: True if successful, False if an error was encountered.
         """
         output_path = os.path.join(str(self.output_directory), filename + ".json")
+
+        # Assume success initially
+        success = True
 
         command = [
             LIGHTHOUSE_CMD,
@@ -35,6 +42,7 @@ class LighthouseRunner:
             output_path,
             "--no-enable-error-reporting",
             "--no-update-notifier",
+            "--chrome-flags=\"--headless\"",
             "--quiet",
             "--preset",
             "desktop"
@@ -44,7 +52,26 @@ class LighthouseRunner:
             subprocess.run(command, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             print("Command execution failed:", e.output)
+            success = False
         except FileNotFoundError:
             print("Lighthouse command not found. Please check the path.")
+            success = False
         except Exception as ex:
             print("An error occurred:", str(ex))
+            success = False
+
+        return success
+
+    def audit_exists(self, filename):
+        """
+        Check if the audit JSON file exists.
+
+        Args:
+            filename (str): The name of the audit file (without extension).
+
+        Returns:
+            bool: True if the audit JSON file exists, False otherwise.
+        """
+        audit_json = os.path.join(self.output_directory, f"{filename}.json")
+
+        return os.path.isfile(audit_json)
