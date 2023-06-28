@@ -93,6 +93,8 @@ for url, description in urls_from_csv.items():
         print(f'{description}.json could not be found in: {LIGHTHOUSE_AUDIT}')
         continue
 
+    print('just checking')
+
 
 
     if runner.audit_exist(description):
