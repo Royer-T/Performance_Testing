@@ -1,7 +1,6 @@
 import os
 import subprocess
 from constants import LIGHTHOUSE_CMD
-from pathlib import Path
 
 
 class LighthouseRunner:
@@ -29,7 +28,7 @@ class LighthouseRunner:
         output_path = os.path.join(str(self.output_directory), filename + ".json")
 
         command = [
-            LIGHTHOUSECMD,
+            LIGHTHOUSE_CMD,
             url,
             "--output=json",
             "--output-path",

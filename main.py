@@ -2,6 +2,7 @@ import datetime
 
 #  import packages (modules/classes)
 from data_driver.data_drive import DataDrive
+from lighthouse.lighthouse_metrics import LighthouseRunner
 from metrics.curl_metrics import CurlMetrics
 from url_information.information import Info
 from websites.website import Website
@@ -20,7 +21,7 @@ data_driver_csv = DataDrive(CSV_DRIVER)
 urls_from_csv = data_driver_csv.data_drive_cvs()
 
 # 2. loop through the list of URLs
-for url, strategy in urls_from_csv.items():
+for url, description in urls_from_csv.items():
     # 2.1 create an empty dictionary to store URL data
     url_data = dict()
 
@@ -31,7 +32,7 @@ for url, strategy in urls_from_csv.items():
 
     # update the dictionary
     url_data.update({'URL': url,
-                     'Description': strategy,
+                     'Description': description,
                      'Date': formatted_date
                      })
 
@@ -73,6 +74,15 @@ for url, strategy in urls_from_csv.items():
         url_data.update(ttfb)
 
         # 5. let's get some Lighthouse metrics
+        # Create an object of the Website class
+        output_directory = LIGHTHOUSE_AUDIT
+        runner = LighthouseRunner(output_directory)
+
+        # Run the Lighthouse audit
+        runner.run_lighthouse(url, description)
+
+        print('stuff')
+
 
 
 
