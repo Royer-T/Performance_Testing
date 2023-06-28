@@ -22,57 +22,70 @@ urls_from_csv = data_driver_csv.data_drive_cvs()
 
 # 2. loop through the list of URLs
 for url, description in urls_from_csv.items():
-    # 2.1 Create an empty dictionary to store URL data
+    # 2.1 Create a dictionary to store URL data
     url_data = {
         'URL': url,
         'Description': description,
         'Date': datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p"),
         'Environment': None,
-        'Version': None,
-        'Branch': None
+        'Version': 'unknown',
+        'Branch': 'unknown',
+        'dns_lookup': None,
+        'connect_time': None,
+        'start_transfer_time': None,
+        'total_time': None
     }
 
-    # 2.2 gather version information
+    # 2.2 Gather version information
     # Create an object of the Info class
     url_versioning = Info(url)
 
     # Get the environment and versioning information
-    environment = url_versioning.environment()
-    version_string = url_versioning.versioning()
+    version_info = url_versioning.versioning()
 
-    if version_string is not None:
-        url_data['Version'] = version_string.get('version', 'unknown')
-        url_data['Branch'] = version_string.get('branch', 'unknown')
+    if version_info is not None:
+        url_data['Version'] = version_info.get('version', 'unknown')
+        url_data['Branch'] = version_info.get('branch', 'unknown')
 
-    # Update the dictionary
-    url_data['Environment'] = environment
+    # Update the dictionary with the environment
+    url_data['Environment'] = url_versioning.environment()
 
-
-
-
-
-
-
-
-
-
-
-    # 3. we need to know if the URL is 'up' if an evaluation can happen
+    # 3. Check if the URL is 'up' before evaluation
     # Create an object of the Website class
     url_response = Website()
     url_up = url_response.website_up(url)
 
-    if url_up is False:
-        # might want to log an error or something
-        print(f'I am bad URL: {url}')
-    else:
-        # 4. let's get some curl metrics
-        # Create an object of the CurlMetrics class
-        curl_metrics = CurlMetrics(url)
-        ttfb = curl_metrics.calculate_ttfb()
+    if not url_up:
+        # Log an error or handle the case where the URL is not reachable
+        print(f'Error: URL is down - {url}')
+        continue
 
-        # update the dictionary
-        url_data.update(ttfb)
+    # 4. Let's get some curl metrics
+    # Create an object of the CurlMetrics class
+    curl_metrics = CurlMetrics(url)
+    ttfb = curl_metrics.calculate_ttfb()
+
+    url_data['dns_lookup'] = ttfb.get('dns_lookup')
+    url_data['connect_time'] = ttfb.get('connect_time')
+    url_data['start_transfer_time'] = ttfb.get('start_transfer_time')
+    url_data['total_time'] = ttfb.get('total_time')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         # 5. let's get some Lighthouse metrics
         # Create an object of the Website class
