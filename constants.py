@@ -1,6 +1,13 @@
-import os
+from pathlib import Path
 
-CSV_DRIVER = os.path.join(os.getcwd(), 'CPS_url.csv')
-CHROMEDRIVER = os.path.join(os.getcwd(), 'chromedriver.exe')
-CHROME_EXE = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-DATABASE = os.path.join(os.getcwd(), 'performance_monitoring_trial.db')
+current_directory = Path.cwd()
+
+CSV_DRIVER = current_directory / 'CPS_url.csv'
+CHROMEDRIVER = current_directory / 'chromedriver.exe'
+CHROME_EXE = Path('C:/Program Files/Google/Chrome/Application/chrome.exe')
+DATABASE = current_directory / 'performance_monitoring_trial.db'
+LIGHTHOUSE_AUDIT = current_directory / 'lighthouse_audits'
+
+# this will vary depending on the machine that it is run against
+LIGHTHOUSE_CMD = 'C:\\Users\\RRJTh\\AppData\\Roaming\\npm\\lighthouse.cmd'
+
