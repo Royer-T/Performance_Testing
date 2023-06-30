@@ -33,7 +33,17 @@ for url, description in urls_from_csv.items():
         'dns_lookup': None,
         'connect_time': None,
         'start_transfer_time': None,
-        'total_time': None
+        'total_time': None,
+        'Performance_score': None,
+        'Accessibility_score': None,
+        'Best_Practices_score': None,
+        'SEO_score': None,
+        'first_contentful_paint': None,
+        'speed_index': None,
+        'largest_contentful_paint': None,
+        'cumulative_layout_shift': None,
+        'total_blocking_time': None,
+        'time_to_interactive': None
     }
 
     # 2.2 Gather version information
@@ -93,16 +103,28 @@ for url, description in urls_from_csv.items():
         print(f'{description}.json could not be found in: {LIGHTHOUSE_AUDIT}')
         continue
 
-    print('just checking')
+    # 5.3 we need to pull metrics from the audit
+    lighthouse_metrics = runner.pull_audit_metrics(description)
+
+    url_data['Performance_score'] = lighthouse_metrics.get('performance_score')
+    url_data['Accessibility_score'] = lighthouse_metrics.get('accessibility_score')
+    url_data['Best_Practices_score'] = lighthouse_metrics.get('best_practices_score')
+    url_data['SEO_score'] = lighthouse_metrics.get('seo_score')
+    url_data['first_contentful_paint'] = lighthouse_metrics.get('first_contentful_paint')
+    url_data['speed_index'] = lighthouse_metrics.get('speed_index')
+    url_data['largest_contentful_paint'] = lighthouse_metrics.get('largest_contentful_paint')
+    url_data['cumulative_layout_shift'] = lighthouse_metrics.get('cumulative_layout_shift')
+    url_data['total_blocking_time'] = lighthouse_metrics.get('total_blocking_time')
+    url_data['time_to_interactive'] = lighthouse_metrics.get('time_to_interactive')
+
+    print('we are here')
 
 
 
-    if runner.audit_exist(description):
-        print('audit is there')
-    else:
-        print('audit is not there')
 
-    print('stuff')
+
+
+    
 
 
 
