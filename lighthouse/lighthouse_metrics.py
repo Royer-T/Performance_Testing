@@ -14,8 +14,8 @@ class LighthouseRunner:
         Initialize the LighthouseRunner instance.
 
         Args:
-            self: An instance of the class containing the method.
-            output_directory (str): The directory where the JSON output files will be saved.
+            output_directory (str): The directory where the JSON output files
+            will be saved.
         """
         self.output_directory = output_directory
 
@@ -24,17 +24,14 @@ class LighthouseRunner:
         Run the Lighthouse audit and save the JSON output to a file.
 
         Args:
-            self: An instance of the class containing the method.
             url (str): The URL to run the Lighthouse audit on.
-            filename (str): The desired name of the output file (without extension).
+            filename (str): The desired name of the output file (without
+            extension).
 
         Returns:
             bool: True if successful, False if an error was encountered.
         """
         output_path = os.path.join(self.output_directory, f"{filename}.json")
-
-        # Assume success initially
-        success = True
 
         command = [
             LIGHTHOUSE_CMD,
@@ -50,23 +47,18 @@ class LighthouseRunner:
         ]
 
         try:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print("Command execution failed:", stderr)
-                success = False
-        except FileNotFoundError:
-            print("Lighthouse command not found. Please check the path.")
-            success = False
+            subprocess.run(command, check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            print("Command execution failed:", e.stderr)
+            return False
 
-        return success
+        return True
 
     def audit_exists(self, filename):
         """
         Check if the audit JSON file exists.
 
         Args:
-            self: An instance of the class containing the method.
             filename (str): The name of the audit file (without extension).
 
         Returns:
@@ -76,12 +68,12 @@ class LighthouseRunner:
 
         return os.path.isfile(audit_json)
 
-    def pull_audit_metrics(self, filename):
+    def get_audit_metrics(self, filename):
         """
-        Retrieves Lighthouse audit metrics from a JSON file and returns them as a dictionary.
+        Retrieves Lighthouse audit metrics from a JSON file and returns them as
+        a dictionary.
 
         Args:
-            self: An instance of the class containing the method.
             filename (str): The name of the JSON file (without the file
             extension).
 
@@ -93,8 +85,8 @@ class LighthouseRunner:
                 - 'performance_score': The performance score as a percentage.
                 - 'best_practices_score': The best practices score as a
                 percentage.
-                - 'first_contentful_paint': The first contentful paint time
-                in milliseconds.
+                - 'first_contentful_paint': The first contentful paint time in
+                milliseconds.
                 - 'speed_index': The speed index value.
                 - 'largest_contentful_paint': The largest contentful paint time
                 in milliseconds.
@@ -124,3 +116,25 @@ class LighthouseRunner:
         }
 
         return lighthouse_metrics
+
+    def delete_audit_file(self, filename):
+        """
+        Delete an audit file.
+
+        Args:
+            filename (str): The name of the audit file (without extension).
+
+        Returns:
+            None
+        """
+        audit_file = os.path.join(self.output_directory, f"{filename}.json")
+
+        try:
+            os.remove(audit_file)
+            print(f"Audit file '{audit_file}' deleted successfully.")
+        except OSError as e:
+            print(f"Error deleting the audit file '{filename}': {e}")
+
+        return None
+
+

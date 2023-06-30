@@ -5,10 +5,8 @@ from data_driver.data_drive import DataDrive
 from lighthouse.lighthouse_metrics import LighthouseRunner
 from metrics.curl_metrics import CurlMetrics
 from url_information.information import Info
+from storage.sqlite import SQLiteDatabase
 from websites.website import Website
-
-import selenium_navigation
-import storage
 
 #  constants
 from constants import *
@@ -43,7 +41,8 @@ for url, description in urls_from_csv.items():
         'largest_contentful_paint': None,
         'cumulative_layout_shift': None,
         'total_blocking_time': None,
-        'time_to_interactive': None
+        'time_to_interactive': None,
+        'error_log': None,
     }
 
     # 2.2 Gather version information
@@ -104,7 +103,7 @@ for url, description in urls_from_csv.items():
         continue
 
     # 5.3 we need to pull metrics from the audit
-    lighthouse_metrics = runner.pull_audit_metrics(description)
+    lighthouse_metrics = runner.get_audit_metrics(description)
 
     url_data['Performance_score'] = lighthouse_metrics.get('performance_score')
     url_data['Accessibility_score'] = lighthouse_metrics.get('accessibility_score')
@@ -117,31 +116,12 @@ for url, description in urls_from_csv.items():
     url_data['total_blocking_time'] = lighthouse_metrics.get('total_blocking_time')
     url_data['time_to_interactive'] = lighthouse_metrics.get('time_to_interactive')
 
+    # 5.4 delete the audit report, we do not need it anymore
+    runner.delete_audit_file(description)
+
+    # 6. store the data
+    # Create an object of the SQLiteDatabase class
+    with SQLiteDatabase(DATABASE) as db:
+        db.insert_url_data(url_data)
+
     print('we are here')
-
-
-
-
-
-
-    
-
-
-
-    # 5. add some information to the SQLite DB
-    # create an object of the class, invokes a parameterized constructor
-    data_storage = storage.sqlite.SQLiteDatabase(DATABASE)
-
-    with data_storage as db:
-        insert_data_query = '''INSERT INTO cps_prod (url, occurrence, 
-        dns_lookup, connect_time, start_transfer_time, total_time) VALUES (?, ?, ?, ?, ?, ?);
-        '''
-
-        # we need the current date/time
-        current_datetime = datetime.now()
-        session_info = (url, current_datetime, dns_lookup, connect_time,
-                        start_transfer_time, total_time)
-
-        data_storage.execute_query(insert_data_query, session_info)
-
-print('we are here')
