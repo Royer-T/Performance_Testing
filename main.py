@@ -1,4 +1,6 @@
 import datetime
+import logging
+import os
 
 #  import packages (modules/classes)
 from data_driver.data_drive import DataDrive
@@ -20,7 +22,25 @@ urls_from_csv = data_driver_csv.data_drive_cvs()
 
 # 2. loop through the list of URLs
 for url, description in urls_from_csv.items():
-    # 2.1 Create a dictionary to store URL data
+    # 2.1 want to use a new log file (same name) for each url
+    # delete the old log file if it exists
+    if os.path.exists(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}'):
+        os.remove(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}')
+
+    # 2.2 clear the log file for each iteration except the first one
+    open(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}', 'w').close()
+
+    # 2.3 create and configure logger
+    logging.basicConfig(filename=f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}',
+                        level=logging.DEBUG,
+                        filemode='a',
+                        force=True,
+                        format='%(asctime)s - %(levelname)s - %(name)s:'
+                               '%(message)s')
+
+    logger = logging.getLogger(__name__)
+
+    # 2.4 Create a dictionary to store URL data
     url_data = {
         'URL': url,
         'Description': description,
@@ -45,7 +65,11 @@ for url, description in urls_from_csv.items():
         'error_log': None,
     }
 
-    # 2.2 Gather version information
+    logger.info(f'URL: {url}')
+    logger.info(f'Description: {description}')
+    logger.info(f"test time: {url_data['Date']}")
+
+    # 2.5 Gather version information
     # Create an object of the Info class
     url_versioning = Info(url)
 
@@ -65,8 +89,20 @@ for url, description in urls_from_csv.items():
     url_up = url_response.website_up(url)
 
     if not url_up:
-        # Log an error or handle the case where the URL is not reachable
-        print(f'Error: URL is down - {url}')
+        # 3.1 Log an error or handle the case where the URL is not reachable
+        # error logged in the Website class
+        with open(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}', 'r') as file:
+            log_content = file.read()
+
+        # add log contents to 'url_data' so it can then be added to the DB
+        url_data['error_log'] = log_content
+
+        # 3.2 add what you have to the DB including the log
+        # Create an object of the SQLiteDatabase class
+        with SQLiteDatabase(DATABASE) as db:
+            db.insert_url_data(url_data)
+
+        logging.shutdown()
         continue
 
     # 4. Let's get some curl metrics
@@ -74,10 +110,19 @@ for url, description in urls_from_csv.items():
     curl_metrics = CurlMetrics(url)
     ttfb = curl_metrics.calculate_ttfb()
 
-    url_data['dns_lookup'] = ttfb.get('dns_lookup')
-    url_data['connect_time'] = ttfb.get('connect_time')
-    url_data['start_transfer_time'] = ttfb.get('start_transfer_time')
-    url_data['total_time'] = ttfb.get('total_time')
+    if ttfb is not None:
+        url_data['dns_lookup'] = ttfb.get('dns_lookup')
+        url_data['connect_time'] = ttfb.get('connect_time')
+        url_data['start_transfer_time'] = ttfb.get('start_transfer_time')
+        url_data['total_time'] = ttfb.get('total_time')
+    else:
+        # 4.1 Log an error or handle the case where the Curl request failed
+        # error logged in the CurlMetrics class
+        with open(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}', 'r') as file:
+            log_content = file.read()
+
+        # add log contents to 'url_data' so it can then be added to the DB
+        url_data['error_log'] = log_content
 
     # 5. let's get some Lighthouse metrics
     # Create an object of the Website class
@@ -88,10 +133,22 @@ for url, description in urls_from_csv.items():
     audit_success = runner.run_lighthouse(url, description)
 
     if not audit_success:
-        # Log an error or handle the case where the audit was not completed
-        print(f"audit for {description} in {url_data.get('Environment')} could "
-              f"not be completed")
-        continue
+        # 5.1.1 Log an error or handle the case where the audit was not
+        # successful
+        # error logged in the LighthouseRunner class
+        with open(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}', 'r') as file:
+            log_content = file.read()
+
+            # add log contents to 'url_data' so it can then be added to the DB
+            url_data['error_log'] = log_content
+
+            # 5.1.2 add what you have to the DB including the log
+            # Create an object of the SQLiteDatabase class
+            with SQLiteDatabase(DATABASE) as db:
+                db.insert_url_data(url_data)
+
+            logging.shutdown()
+            continue
 
     # 5.2 ensure that the audit has created a .json file
     # this is needed since it was created outside the python framework
@@ -99,8 +156,20 @@ for url, description in urls_from_csv.items():
 
     if not audit_json_exist:
         # Log an error or handle the case where the audit was not found
-        print(f'{description}.json could not be found in: {LIGHTHOUSE_AUDIT}')
-        continue
+        # error logged in the LighthouseRunner class
+        with open(f'{LIGHTHOUSE_AUDIT}/{LOG_FILE}', 'r') as file:
+            log_content = file.read()
+
+            # add log contents to 'url_data' so it can then be added to the DB
+            url_data['error_log'] = log_content
+
+            # 5.2.1 add what you have to the DB including the log
+            # Create an object of the SQLiteDatabase class
+            with SQLiteDatabase(DATABASE) as db:
+                db.insert_url_data(url_data)
+
+            logging.shutdown()
+            continue
 
     # 5.3 we need to pull metrics from the audit
     lighthouse_metrics = runner.get_audit_metrics(description)
@@ -124,4 +193,6 @@ for url, description in urls_from_csv.items():
     with SQLiteDatabase(DATABASE) as db:
         db.insert_url_data(url_data)
 
-    print('we are here')
+    logging.shutdown()
+
+print('we are here')

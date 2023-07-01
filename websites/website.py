@@ -1,4 +1,10 @@
+import logging
 import requests
+
+#  set the logging behaviour
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s '
+                                                '- %(name)s:%(message)s')
+logger = logging.getLogger(__name__)
 
 
 class Website:
@@ -15,5 +21,6 @@ class Website:
         try:
             response = requests.get(url)
             return 200 <= response.status_code < 400
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            logger.error(f'Failed to make a request: {str(e)}')
             return False

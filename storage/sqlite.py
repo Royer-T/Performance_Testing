@@ -1,6 +1,11 @@
+import logging
 import sqlite3
 from typing import List, Optional, Tuple
 
+#  set the logging behaviour
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s '
+                                                '- %(name)s:%(message)s')
+logger = logging.getLogger(__name__)
 
 class SQLiteDatabase:
     """
@@ -80,7 +85,9 @@ class SQLiteDatabase:
             self.connection.commit()
             return True
         except sqlite3.Error as e:
-            raise RuntimeError(f"Error executing query: {e}") from e
+            # Log the error message
+            logging.error(f'Error executing query: {e}')
+            raise
 
     def fetch_data(self, query: str, parameters: Optional[Tuple] = None) -> List[Tuple]:
         """
@@ -101,7 +108,9 @@ class SQLiteDatabase:
                 self.cursor.execute(query)
             return self.cursor.fetchall()
         except sqlite3.Error as e:
-            raise RuntimeError(f"Error fetching data: {e}") from e
+            # Log the error message
+            logging.error(f'Error fetching data: {e}')
+            raise
 
     def insert_url_data(self, url_data: dict):
         """
@@ -109,7 +118,6 @@ class SQLiteDatabase:
 
         Args:
             url_data (dict): A dictionary containing URL data.
-
         """
         url_data_keys = [
             'URL', 'Description', 'Date', 'Environment', 'Version',
@@ -122,7 +130,7 @@ class SQLiteDatabase:
         ]
 
         # create a tuple with the values to be inserted
-        session_info = tuple(url_data[key] for key in url_data_keys)
+        session_info = tuple(url_data.get(key) for key in url_data_keys)
 
         # construct the insert query
         insert_data_query = '''
@@ -136,5 +144,10 @@ class SQLiteDatabase:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-        # Execute the query
-        self.execute_query(insert_data_query, session_info)
+        try:
+            # Execute the query
+            self.execute_query(insert_data_query, session_info)
+        except Exception as e:
+            # Log the error message
+            logging.error(f'Error inserting URL data: {e}')
+            raise

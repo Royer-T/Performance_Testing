@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 from constants import LIGHTHOUSE_CMD
@@ -49,7 +50,8 @@ class LighthouseRunner:
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            print("Command execution failed:", e.stderr)
+            logger.error(f'Failed to run Lighthouse audit for URL: {url}'
+                         f'\nError: {e.stderr}')
             return False
 
         return True
@@ -66,7 +68,15 @@ class LighthouseRunner:
         """
         audit_json = os.path.join(self.output_directory, f"{filename}.json")
 
-        return os.path.isfile(audit_json)
+        try:
+            if os.path.isfile(audit_json):
+                return True
+            else:
+                logger.error(f"Audit file '{audit_json}' does not exist.")
+                return False
+        except Exception as e:
+            logger.error(f'An error occurred while checking audit file existence: {e}')
+            return False
 
     def get_audit_metrics(self, filename):
         """
@@ -99,23 +109,37 @@ class LighthouseRunner:
         """
         file_path = os.path.join(self.output_directory, f"{filename}.json")
 
-        with open(file_path, encoding='utf-8') as json_file:
-            loaded_json = json.load(json_file)
+        try:
+            with open(file_path, encoding='utf-8') as json_file:
+                loaded_json = json.load(json_file)
+        except FileNotFoundError as e:
+            logger.error(f"File not found: '{file_path}' : {e} ")
+        except (KeyError, IndexError, TypeError) as e:
+            logger.error(f'Error occurred while accessing audit metrics: {e}')
+        except Exception as e:
+            logger.exception(f'An unexpected error occurred: {e}')
 
-        lighthouse_metrics = {
-            'seo_score': str(round(loaded_json["categories"]["seo"]["score"] * 100)),
-            'accessibility_score': str(round(loaded_json["categories"]["accessibility"]["score"] * 100)),
-            'performance_score': str(round(loaded_json["categories"]["performance"]["score"] * 100)),
-            'best_practices_score': str(round(loaded_json["categories"]["best-practices"]["score"] * 100)),
-            'first_contentful_paint': loaded_json["audits"]["metrics"]["details"]["items"][0]["firstContentfulPaint"],
-            'speed_index': loaded_json["audits"]["metrics"]["details"]["items"][0]["speedIndex"],
-            'largest_contentful_paint': loaded_json["audits"]["metrics"]["details"]["items"][0]["largestContentfulPaint"],
-            'cumulative_layout_shift': str(round(loaded_json["audits"]["metrics"]["details"]["items"][0]["cumulativeLayoutShift"], 0)),
-            'total_blocking_time': loaded_json["audits"]["metrics"]["details"]["items"][0]["totalBlockingTime"],
-            'time_to_interactive': loaded_json["audits"]["metrics"]["details"]["items"][0]["interactive"]
-        }
+        try:
+            lighthouse_metrics = {
+                'seo_score': str(round(loaded_json["categories"]["seo"]["score"] * 100)),
+                'accessibility_score': str(round(loaded_json["categories"]["accessibility"]["score"] * 100)),
+                'performance_score': str(round(loaded_json["categories"]["performance"]["score"] * 100)),
+                'best_practices_score': str(round(loaded_json["categories"]["best-practices"]["score"] * 100)),
+                'first_contentful_paint': loaded_json["audits"]["metrics"]["details"]["items"][0][
+                    "firstContentfulPaint"],
+                'speed_index': loaded_json["audits"]["metrics"]["details"]["items"][0]["speedIndex"],
+                'largest_contentful_paint': loaded_json["audits"]["metrics"]["details"]["items"][0][
+                    "largestContentfulPaint"],
+                'cumulative_layout_shift': str(
+                    round(loaded_json["audits"]["metrics"]["details"]["items"][0]["cumulativeLayoutShift"], 0)),
+                'total_blocking_time': loaded_json["audits"]["metrics"]["details"]["items"][0]["totalBlockingTime"],
+                'time_to_interactive': loaded_json["audits"]["metrics"]["details"]["items"][0]["interactive"]
+            }
 
-        return lighthouse_metrics
+            return lighthouse_metrics
+
+        finally:
+            logger.info("Audit metrics retrieval completed.")
 
     def delete_audit_file(self, filename):
         """
@@ -131,10 +155,7 @@ class LighthouseRunner:
 
         try:
             os.remove(audit_file)
-            print(f"Audit file '{audit_file}' deleted successfully.")
         except OSError as e:
-            print(f"Error deleting the audit file '{filename}': {e}")
+            logger.warning(f"Error deleting the audit file '{filename}': {e}")
 
         return None
-
-
