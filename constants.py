@@ -10,5 +10,5 @@ LIGHTHOUSE_AUDIT = current_directory / 'lighthouse_audits'
 LOG_FILE = 'performance_data_errors.log'
 
 # this will vary depending on the machine that it is run against
-LIGHTHOUSE_CMD = 'C:\\Users\\RRJTh\\AppData\\Roaming\\npm\\lighthouse.cmd'
+LIGHTHOUSE_CMD = 'C:\\Users\\Roger.Thibodeau\\AppData\\Roaming\\npm\\lighthouse.cmd'
 
