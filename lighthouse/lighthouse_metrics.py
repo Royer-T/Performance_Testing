@@ -2,7 +2,12 @@ import json
 import logging
 import os
 import subprocess
-from constants import LIGHTHOUSE_CMD
+from dotenv import load_dotenv
+from pathlib import Path
+
+#  constants (includes from .env)
+env_path = Path('.env')
+load_dotenv(dotenv_path=env_path)
 
 
 class LighthouseRunner:
@@ -35,7 +40,7 @@ class LighthouseRunner:
         output_path = os.path.join(self.output_directory, f"{filename}.json")
 
         command = [
-            LIGHTHOUSE_CMD,
+            os.environ.get('LIGHTHOUSE_CMD', 'lighthouse'),
             url,
             "--output=json",
             "--output-path=" + output_path,
@@ -50,8 +55,8 @@ class LighthouseRunner:
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
-            logging.error(f'Failed to run Lighthouse audit for URL: {url}'
-                          f'\nError: {e.stderr}')
+            logging.error(f'Failed to run Lighthouse audit for URL: {url}\n'
+                          f'Error: {e.stderr}')
             return False
 
         return True
@@ -68,14 +73,10 @@ class LighthouseRunner:
         """
         audit_json = os.path.join(self.output_directory, f"{filename}.json")
 
-        try:
-            if os.path.isfile(audit_json):
-                return True
-            else:
-                logging.error(f"Audit file '{audit_json}' does not exist.")
-                return False
-        except Exception as e:
-            logging.error(f'An error occurred while checking audit file existence: {e}')
+        if os.path.isfile(audit_json):
+            return True
+        else:
+            logging.error(f"Audit file '{audit_json}' does not exist.")
             return False
 
     def get_audit_metrics(self, filename):

@@ -1,5 +1,5 @@
 # idea folder
 .idea
-/chromedriver.exe
 /performance_monitoring_trial.db
-/lighthouse stuff/
+/CPS_url.csv
+/lighthouse_cps.db
