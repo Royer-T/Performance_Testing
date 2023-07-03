@@ -1,7 +1,9 @@
 # idea folder
 .idea
 
+# dotenv
+.env
+
 /performance_monitoring_trial.db
 /CPS_url.csv
 /lighthouse_cps.db
-/.env
