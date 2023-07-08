@@ -120,7 +120,7 @@ class SQLiteDatabase:
             url_data (dict): A dictionary containing URL data.
         """
         url_data_keys = [
-            'URL', 'Description', 'Date', 'Environment', 'Version',
+            'URL', 'Description', 'Date', 'Time', 'Environment', 'Version',
             'Branch', 'dns_lookup', 'connect_time',
             'start_transfer_time', 'total_time', 'Performance_score',
             'Accessibility_score', 'Best_Practices_score',
@@ -135,13 +135,13 @@ class SQLiteDatabase:
         # construct the insert query
         insert_data_query = '''
             INSERT INTO Lighthouse_CPS (
-                url, description, date, environment, version, branch, dns_lookup,
-                connect_time, start_transfer_time, total_time, performance_score,
-                accessibility_score, best_practices_score, seo_score,
-                first_contentful_paint, speed_index, largest_contentful_paint,
-                cumulative_layout_shift, total_blocking_time, time_to_interactive,
-                error_log
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                url, description, date, time, environment, version, branch, 
+                dns_lookup, connect_time, start_transfer_time, total_time, 
+                performance_score, accessibility_score, best_practices_score, 
+                seo_score, first_contentful_paint, speed_index, 
+                largest_contentful_paint, cumulative_layout_shift, 
+                total_blocking_time, time_to_interactive, error_log
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
         try:

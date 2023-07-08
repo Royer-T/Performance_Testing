@@ -40,11 +40,19 @@ for url, description in urls_from_csv.items():
 
     logger = logging.getLogger(__name__)
 
+    # Get the current date and time
+    current_datetime = datetime.datetime.now()
+
+    formatted_date = f'{current_datetime.month}/{current_datetime.day}/{current_datetime.year}'
+    formatted_time = current_datetime.strftime('%I:%M %p')
+    formatted_time = formatted_time.lstrip("0").replace("AM", "AM").replace("PM", "PM")
+
     # 2.4 Create a dictionary to store URL data
     url_data = {
         'URL': url,
         'Description': description,
-        'Date': datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p"),
+        'Date': formatted_date,
+        'Time': formatted_time,
         'Environment': None,
         'Version': 'unknown',
         'Branch': 'unknown',
